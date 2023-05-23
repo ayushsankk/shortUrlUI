@@ -46,6 +46,15 @@ const App = () => {
     }
   };
 
+  const fetchOutOfWarrantyProducts = async () => {
+    try {
+      const response = await axios.get('http://localhost:8080/outOfWarrantyProducts');
+      setProducts(response.data);
+    } catch (error) {
+      console.error('Error fetching out-of-warranty products:', error);
+    }
+  };
+
   return (
     <div className="container">
       <h1 className="title">Product Management</h1>
@@ -71,6 +80,8 @@ const App = () => {
 
       <div className="product-list">
         <h2>Products</h2>
+        <button className="filter-button" onClick={fetchProducts}>All products</button>
+        <button className="filter-button" onClick={fetchOutOfWarrantyProducts}>Out of Warranty Products</button>
         <ul className="list">
           {products.map((product) => (
             <li key={product.id} className="list-item">
