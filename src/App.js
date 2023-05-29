@@ -1,97 +1,59 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import axios from 'axios';
-import './App.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
-const App = () => {
-  const [products, setProducts] = useState([]);
-  const [newProduct, setNewProduct] = useState({
-    name: '',
-    type: '',
-    place: '',
-    warranty: 0
-  });
+const ShortUrlForm = () => {
+  const [originalUrl, setOriginalUrl] = useState('');
+  const [shortUrl, setShortUrl] = useState('');
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
+  const handleGenerate = async () => {
     try {
-      const response = (await axios.get('http://localhost:8080/products'));
-      setProducts(response.data);
+      const response = await axios.post('http://localhost:8080/api/short-url/generate', originalUrl);
+      setShortUrl(response.data);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error('Error generating short URL:', error);
     }
   };
 
-  const handleInputChange = (e) => {
-    setNewProduct({
-      ...newProduct,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  const addProduct = async () => {
+  const handleRetrieve = async () => {
     try {
-      await axios.post('http://localhost:8080/product', newProduct);
-      setNewProduct({
-        name: '',
-        type: '',
-        place: '',
-        warranty: 0
-      });
-      fetchProducts();
+      const response = await axios.get(`http://localhost:8080/api/short-url/original/${shortUrl}`);
+      console.log('Original URL:', response.data);
     } catch (error) {
-      console.error('Error adding product:', error);
-    }
-  };
-
-  const fetchOutOfWarrantyProducts = async () => {
-    try {
-      const response = await axios.get('http://localhost:8080/outOfWarrantyProducts');
-      setProducts(response.data);
-    } catch (error) {
-      console.error('Error fetching out-of-warranty products:', error);
+      console.error('Error retrieving original URL:', error);
     }
   };
 
   return (
-    <div className="container">
-      <h1 className="title">Product Management</h1>
-
-      <div className="form-container">
-        <h2>Add Product</h2>
-        <form className="form">
-          <label className="form-label">Name:</label>
-          <input className="form-input" type="text" name="name" value={newProduct.name} onChange={handleInputChange} />
-
-          <label className="form-label">Type:</label>
-          <input className="form-input" type="text" name="type" value={newProduct.type} onChange={handleInputChange} />
-
-          <label className="form-label">Place:</label>
-          <input className="form-input" type="text" name="place" value={newProduct.place} onChange={handleInputChange} />
-
-          <label className="form-label">Warranty:</label>
-          <input className="form-input" type="number" name="warranty" value={newProduct.warranty} onChange={handleInputChange} />
-
-          <button className="form-button" type="button" onClick={addProduct}>Add</button>
-        </form>
-      </div>
-
-      <div className="product-list">
-        <h2>Products</h2>
-        <button className="filter-button" onClick={fetchProducts}>All products</button>
-        <button className="filter-button" onClick={fetchOutOfWarrantyProducts}>Out of Warranty Products</button>
-        <ul className="list">
-          {products.map((product) => (
-            <li key={product.id} className="list-item">
-              <strong className="product-info">Name:</strong> {product.name}, <strong className="product-info">Type:</strong> {product.type}, <strong className="product-info">Place:</strong> {product.place}, <strong className="product-info">Warranty:</strong> {product.warranty}
-            </li>
-          ))}
-        </ul>
+    <div className="container mt-5">
+      <div className="row">
+        <div className="col-md-6 offset-md-3">
+          <h2>Short URL Generator</h2>
+          <div className="form-group">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Enter the original URL"
+              value={originalUrl}
+              onChange={(e) => setOriginalUrl(e.target.value)}
+            />
+          </div>
+          <button className="btn btn-primary" onClick={handleGenerate}>Generate Short URL</button>
+          <br />
+          <div className="form-group mt-4">
+            <input
+              type="text"
+              className="form-control"
+              placeholder="Enter the short URL"
+              value={shortUrl}
+              onChange={(e) => setShortUrl(e.target.value)}
+            />
+          </div>
+          <button className="btn btn-primary" onClick={handleRetrieve}>Retrieve Original URL</button>
+        </div>
       </div>
     </div>
   );
 };
 
-export default App;
+export default ShortUrlForm;
